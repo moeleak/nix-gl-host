@@ -13,7 +13,7 @@ import sys
 import tempfile
 import time
 from glob import glob
-from typing import List, Literal, Dict, Tuple, TypedDict, TextIO, Optional
+from typing import Dict, List, Optional
 
 IN_NIX_STORE = False
 CACHE_VERSION = 3
@@ -274,16 +274,9 @@ def get_ld_paths() -> List[str]:
         paths.extend(LDPATH.split(":"))
     if os.path.exists("/etc/ld.so.conf"):
         paths.extend(parse_ld_conf_file("/etc/ld.so.conf"))
-    else:
-        print('WARNING: file "/etc/ld.so.conf" not found.', file=sys.stderr)
     if PREFIX:
         if os.path.exists(PREFIX + "/etc/ld.so.conf"):
             paths.extend(parse_ld_conf_file(PREFIX + "/etc/ld.so.conf"))
-        else:
-            print(
-                'WARNING: file "' + PREFIX + '/etc/ld.so.conf" not found.',
-                file=sys.stderr,
-            )
         paths.extend(
             [
                 PREFIX + "/lib",
@@ -390,9 +383,9 @@ def generate_nvidia_egl_config_files(egl_conf_dir: str) -> None:
         )
 
     dso_paths = [
-        ("10_nvidia.json", f"libEGL_nvidia.so.0"),
-        ("10_nvidia_wayland.json", f"libnvidia-egl-wayland.so.1"),
-        ("15_nvidia_gbm.json", f"libnvidia-egl-gbm.so.1"),
+        ("10_nvidia.json", "libEGL_nvidia.so.0"),
+        ("10_nvidia_wayland.json", "libnvidia-egl-wayland.so.1"),
+        ("15_nvidia_gbm.json", "libnvidia-egl-gbm.so.1"),
     ]
 
     for conf_file_name, dso_name in dso_paths:
@@ -605,7 +598,7 @@ def nvidia_main(
     assert nix_gl_ld_library_path, "The nix-host-gl LD_LIBRARY_PATH is not set"
     log_info(f"Injecting LD_LIBRARY_PATH: {nix_gl_ld_library_path}")
     new_env = {}
-    log_info(f"__GLX_VENDOR_LIBRARY_NAME = nvidia")
+    log_info("__GLX_VENDOR_LIBRARY_NAME = nvidia")
     new_env["__GLX_VENDOR_LIBRARY_NAME"] = "nvidia"
     log_info(f"__EGL_VENDOR_LIBRARY_DIRS = {egl_conf_dir}")
     new_env["__EGL_VENDOR_LIBRARY_DIRS"] = egl_conf_dir
@@ -628,7 +621,7 @@ def exec_binary(bin_path: str, args: List[str]) -> None:
 
     Sets the relevant libGLvnd env variables."""
     log_info(f"Execv-ing {bin_path}")
-    log_info(f"Goodbye now.")
+    log_info("Goodbye now.")
     os.execvp(bin_path, [bin_path] + args)
 
 
